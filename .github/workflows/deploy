@@ -1,0 +1,20 @@
+name: Deploy to Hugging Face
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install HF CLI
+        run: pip install huggingface_hub
+
+      - name: Upload to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          huggingface-cli upload username/deepseek-v3.2-exp ./ --repo-type=space --token $HF_TOKEN
