@@ -1,34 +1,20 @@
-name: Summarize new issues
+name: Deploy to Hugging Face
 
 on:
-  issues:
-    types: [opened]
+  push:
+    branches: [ "main" ]
 
 jobs:
-  summary:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      models: read
-      contents: read
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
-      - name: Run AI inference
-        id: inference
-        uses: actions/ai-inference@v1
-        with:
-          prompt: |
-            Summarize the following GitHub issue in one paragraph:
-            Title: ${{ github.event.issue.title }}
-            Body: ${{ github.event.issue.body }}
+      - name: Install HF CLI
+        run: pip install huggingface_hub
 
-      - name: Comment with AI summary
-        run: |
-          gh issue comment $ISSUE_NUMBER --body '${{ steps.inference.outputs.response }}'
+      - name: Upload to Hugging Face
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_NUMBER: ${{ github.event.issue.number }}
-          RESPONSE: ${{ steps.inference.outputs.response }}
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          huggingface-cli upload hannisun/DeepSeek-V3.2-EXP-Test ./ --repo-type=space --token $HF_TOKEN
